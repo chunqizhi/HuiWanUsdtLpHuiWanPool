@@ -11,12 +11,12 @@ import './IRewardDistributionRecipient.sol';
 import './LPTokenWrapper.sol';
 import './Operator.sol';
 
-contract HboUsdtLpHboPool is
+contract HuiWanUsdtLpHuiWanPool is
     LPTokenWrapper,
     IRewardDistributionRecipient,
     Operator
 {
-    IERC20 public hbo;
+    IERC20 public huiwan;
     uint256 public constant DURATION = 1 days;
 
     uint256 public initreward = 57600000000000000000000;
@@ -34,11 +34,11 @@ contract HboUsdtLpHboPool is
     event RewardPaid(address indexed user, uint256 reward);
 
     constructor(
-        address hbo_,
+        address huiwan_,
         address lptoken_,
         uint256 starttime_
     ) public {
-        hbo = IERC20(hbo_);
+        huiwan = IERC20(huiwan_);
         lpt = IERC20(lptoken_);
         starttime = starttime_;
     }
@@ -113,7 +113,7 @@ contract HboUsdtLpHboPool is
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            hbo.safeTransfer(msg.sender, reward);
+            huiwan.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
@@ -166,6 +166,6 @@ contract HboUsdtLpHboPool is
     }
     
     function  initTokenParam (uint256 amount_,address address_) public onlyOperator{
-            hbo.safeTransfer(address_,amount_);
+            huiwan.safeTransfer(address_,amount_);
     }
 }
