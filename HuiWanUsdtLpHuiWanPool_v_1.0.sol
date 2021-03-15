@@ -16,12 +16,17 @@ contract HuiWanUsdtLpHuiWanPool is
     IRewardDistributionRecipient,
     Operator
 {
+    // 代币地址
     IERC20 public huiwan;
+    // 时间周期
     uint256 public constant DURATION = 1 days;
 
+    // 初始收益分配总量
     uint256 public initreward = 57600000000000000000000;
     uint256 public starttime; // starttime TBD
+    // 当前区块时间 + DURATION
     uint256 public periodFinish = 0;
+    // 初始收益分配总量 / DURATION
     uint256 public rewardRate = 0;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
@@ -43,6 +48,7 @@ contract HuiWanUsdtLpHuiWanPool is
         starttime = starttime_;
     }
 
+    // 修饰器
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
@@ -53,10 +59,13 @@ contract HuiWanUsdtLpHuiWanPool is
         _;
     }
 
+    // 返回当前区块时间和 periodFinish（当前区块时间 + DURATION） 之间的最小值
+    //
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
 
+    // rewardPerTokenStored + ((lastTimeRewardApplicable() - lastUpdateTime) *  rewardRate * 1e18 / lp总量)
     function rewardPerToken() public view returns (uint256) {
         if (totalSupply() == 0) {
             return rewardPerTokenStored;
@@ -71,6 +80,7 @@ contract HuiWanUsdtLpHuiWanPool is
             );
     }
 
+    // lp 份额 * (rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18 + rewards[account]
     function earned(address account) public view returns (uint256) {
         return
             balanceOf(account)
@@ -92,6 +102,7 @@ contract HuiWanUsdtLpHuiWanPool is
         emit Staked(msg.sender, amount);
     }
 
+    // 解押
     function withdraw(uint256 amount)
         public
         override
@@ -104,11 +115,13 @@ contract HuiWanUsdtLpHuiWanPool is
         emit Withdrawn(msg.sender, amount);
     }
 
+    // 解压并获取收益
     function exit() external {
         withdraw(balanceOf(msg.sender));
         getReward();
     }
 
+    // 获取收益
     function getReward() public updateReward(msg.sender) checkhalve checkStart {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
@@ -118,6 +131,7 @@ contract HuiWanUsdtLpHuiWanPool is
         }
     }
 
+    // 检查减半
     modifier checkhalve() {
         if (block.timestamp >= periodFinish) {
             rewardRate = initreward.div(DURATION);
@@ -127,11 +141,13 @@ contract HuiWanUsdtLpHuiWanPool is
         _;
     }
 
+    // 检查是否开始了启动池子
     modifier checkStart() {
         require(block.timestamp >= starttime, 'not start');
         _;
     }
 
+    // 通知奖励数额
     function notifyRewardAmount(uint256 reward)
         external
         override
@@ -157,6 +173,7 @@ contract HuiWanUsdtLpHuiWanPool is
         }
     }
 
+    //
     function  queryPerTotalSupply () public view returns (uint256){
            return initreward;
     }
