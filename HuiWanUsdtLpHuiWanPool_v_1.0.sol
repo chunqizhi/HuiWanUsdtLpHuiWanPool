@@ -75,7 +75,7 @@ contract HuiWanUsdtLpHuiWanPool is
         return
             balanceOf(account)
                 .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
-                .div(1e9)
+                .div(1e18)
                 .add(rewards[account]);
     }
 
